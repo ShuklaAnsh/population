@@ -1,6 +1,12 @@
 version: '3.8'
 name: population
 services:
+  frontend:
+    container_name: population_frontend
+    build:
+      context: ./frontend
+    ports:
+      - 4001:4001
 
   backend:
     container_name: population_backend
