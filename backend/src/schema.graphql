@@ -1,0 +1,45 @@
+type City {
+  id: Int!
+  country: Country!
+  name: String!
+  isCapital: Boolean
+  population: Int
+}
+
+type Country {
+  cities(input: CitiesInput): [City]
+  countryCode: String!
+  name: String!
+  flagEmoji: String
+  population: Int
+}
+
+input StringListFilter {
+  in: [String]
+  notIn: [String]
+}
+
+input NumberFilter {
+  greaterThan: Int
+  lessThan: Int
+  eq: Int
+  neq: Int
+}
+
+input CitiesInput {
+  countryCodes: StringListFilter
+  population: NumberFilter
+  capitalsOnly: Boolean
+}
+
+input CountriesInput {
+  # codes: StringListFilter
+  population: NumberFilter
+}
+
+type Query {
+  city(Id: Int!): City
+  country(code: String!): Country
+  cities(input: CitiesInput): [City]
+  countries(input: CountriesInput): [Country]
+}

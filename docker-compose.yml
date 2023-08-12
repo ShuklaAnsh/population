@@ -2,6 +2,15 @@ version: '3.8'
 name: population
 services:
 
+  backend:
+    container_name: population_backend
+    build: 
+      context: ./backend
+    environment:
+      - DATABASE_HOST=population_database
+    ports:
+      - 4000:4000
+
   database:
     container_name: population_database
     image: postgres
