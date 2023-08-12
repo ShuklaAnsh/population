@@ -16,6 +16,12 @@ const GET_INITIAL_COUNTRIES_QUERY = gql`
   }
 `;
 
+const convertEmoji = (emoji: string): string =>
+  (emoji ?? "")
+    .split("\\u")
+    .map((hexValue) => String.fromCharCode(parseInt(hexValue, 16)))
+    .join("");
+
 function DisplayCountries() {
   const { loading, error, data } = useQuery<{
     countries: Country[];
@@ -31,7 +37,9 @@ function DisplayCountries() {
     >
       <div className="flex flex-row items-center justify-center space-x-2">
         <h2 className="m-0">{country.name}</h2>
-        {/* <i className="m-0 text-3xl">{country.flagEmoji}</i> */}
+        <span role="img" aria-label="flag" className="m-0 text-3xl">
+          {convertEmoji(country.flagEmoji)}
+        </span>
       </div>
 
       <p>
