@@ -6,7 +6,7 @@ export interface IButtonProps extends React.PropsWithChildren {
 export const Button = (props: IButtonProps) => (
   <a
     onClick={props.onClick}
-    className={`bg-pd-amber w-fit rounded-md p-2 text-zinc-600 shadow-sm hover:bg-amber-500 hover:shadow-lg ${props.className}`}
+    className={`bg-pd-amber w-fit rounded-md p-2 text-zinc-600 shadow-sm hover:cursor-pointer hover:bg-amber-500 hover:shadow-lg ${props.className}`}
   >
     {props.children}
   </a>
