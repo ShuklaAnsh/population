@@ -6,6 +6,7 @@ export const GET_INITIAL_CITIES_QUERY = gql`
       id
       name
       population
+      isCapital
       country {
         countryCode
       }
