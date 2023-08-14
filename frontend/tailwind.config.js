@@ -5,7 +5,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'pd-green': '#058C6F',
+        'pd-amber': "#FEBf00"
+      }
+    },
   },
   plugins: [require('@tailwindcss/typography')],
 }

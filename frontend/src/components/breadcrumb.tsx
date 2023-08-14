@@ -1,35 +1,51 @@
-import { useParams, NavLink } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { RouteParams } from "../types";
+
+const BreadCrumbNavLink = (props: {
+  to: string;
+  label: string;
+  show: boolean;
+  active?: boolean;
+  first?: boolean;
+}) =>
+  props.show ? (
+    <>
+      {props.first ? "" : " > "}
+      <Link
+        className={props.active ? "text-pd-amber" : "text-white"}
+        to={props.to}
+      >
+        {props.label}
+      </Link>
+    </>
+  ) : (
+    <></>
+  );
 
 export const Breadcrumb = () => {
   const params: RouteParams = useParams();
 
-  const homeLink = <NavLink to="/">Home </NavLink>;
-  const countryLink = params.countryCode ? (
-    <>
-      {" > "}
-      <NavLink to={`/country/${params.countryCode}`}>
-        {params.countryCode}
-      </NavLink>
-    </>
-  ) : (
-    <></>
-  );
-
-  const cityLink = params.countryCode ? (
-    <>
-      {" > "}
-      <NavLink to={`/country/${params.countryCode}/city/${params.cityId}`}>
-        {params.cityId}
-      </NavLink>
-    </>
-  ) : (
-    <></>
-  );
-
   return (
     <div>
-      {homeLink} {countryLink} {cityLink}
+      <BreadCrumbNavLink
+        label="Home"
+        to="/"
+        first
+        show
+        active={!params.countryCode && !params.cityId}
+      />
+      <BreadCrumbNavLink
+        label={params.countryCode!}
+        to={`/country/${params.countryCode}`}
+        show={!!params.countryCode}
+        active={!!params.countryCode && !params.cityId}
+      />
+      <BreadCrumbNavLink
+        label={params.cityId!}
+        to={`/country/${params.countryCode}/city/${params.cityId}`}
+        show={!!params.cityId}
+        active={!!params.countryCode && !!params.cityId}
+      />
     </div>
   );
 };

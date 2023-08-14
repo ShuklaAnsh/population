@@ -34,7 +34,7 @@ export const FilterMenu = (props: FilterMenuProps) => {
         />
       </label>
       <button
-        className="w-fit rounded-lg bg-blue-200 px-2 py-1"
+        className="bg-pd-amber w-fit rounded-md p-2 px-2 py-1 text-zinc-600 shadow-sm hover:bg-amber-500 hover:shadow-lg"
         onClick={() => filter.onOptionSelect(parseInt(filterVals[idx]))}
       >
         Apply
