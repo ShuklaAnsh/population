@@ -1,25 +1,22 @@
-import { NavLink, useNavigate, useOutletContext } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
-import { Country, ContextType } from "../types";
+import { Country } from "../types";
 import { convertEmoji } from "../utils";
+import { FilterMenu } from "../components/filter-menu";
 
 const GET_INITIAL_COUNTRIES_QUERY = gql`
-  query HomePageDetails {
-    countries {
+  query HomePageCountryDetails($countriesInput: CountriesInput) {
+    countries(input: $countriesInput) {
       name
+      countryCode
       flagEmoji
       population
-      countryCode
-      cities(input: { capitalsOnly: true }) {
-        name
-      }
     }
   }
 `;
 
 export const HomePage = () => {
-  const navigate = useNavigate();
-  const { loading, error, data } = useQuery<{
+  const { loading, error, data, refetch } = useQuery<{
     countries: Country[];
   }>(GET_INITIAL_COUNTRIES_QUERY);
 
@@ -41,9 +38,6 @@ export const HomePage = () => {
       <p>
         <b>Population: </b>
         {country.population}
-        <br />
-        <b>Capital: </b>
-        {country.cities?.at(0)?.name}
       </p>
       <NavLink to={`/country/${country.countryCode}`}>
         <a className="rounded-md bg-blue-300 p-2 shadow-sm hover:bg-blue-400 hover:shadow-lg">
@@ -53,11 +47,29 @@ export const HomePage = () => {
     </div>
   ));
 
+  const onFilterApply = (filter: number) => {
+    refetch({
+      countriesInput: {
+        population: {
+          greaterThan: filter,
+        },
+      },
+    });
+  };
+
   return (
     <div className="prose max-w-full">
       <h3>Group By: Countries</h3>
       <div>Search</div>
-      <div>Filter</div>
+      <FilterMenu
+        title={"Filter Countries"}
+        filters={[
+          {
+            label: "Greater than",
+            onOptionSelect: onFilterApply,
+          },
+        ]}
+      />
       <div className="flex flex-wrap justify-center">{countries}</div>
     </div>
   );
