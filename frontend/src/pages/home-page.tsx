@@ -1,33 +1,47 @@
 import { useNavigate } from "react-router-dom";
-import { useQuery, gql } from "@apollo/client";
-import { Country } from "../types";
+import { useLazyQuery } from "@apollo/client";
+import { City, Country } from "../types";
 import { convertEmoji } from "../utils";
 import { FilterMenu } from "../components/filter-menu";
 import { Card } from "../components/card";
 import { Button } from "../components/button";
-
-const GET_INITIAL_COUNTRIES_QUERY = gql`
-  query HomePageCountryDetails($countriesInput: CountriesInput) {
-    countries(input: $countriesInput) {
-      name
-      countryCode
-      flagEmoji
-      population
-    }
-  }
-`;
+import { GET_INITIAL_COUNTRIES_QUERY } from "../graphql/queries/getInitialCountries";
+import { GET_INITIAL_CITIES_QUERY } from "../graphql/queries/getInitialCities";
+import { useEffect, useState } from "react";
 
 export const HomePage = () => {
+  const [groupBy, setGroupBy] = useState<"Country" | "City">("Country");
+
   const navigate = useNavigate();
-  const { loading, error, data, refetch } = useQuery<{
+  const [getInitialCountries, countriesQuery] = useLazyQuery<{
     countries: Country[];
   }>(GET_INITIAL_COUNTRIES_QUERY);
 
-  if (loading) return <p>Loading...</p>;
+  const [getInitialCities, citiesQuery] = useLazyQuery<{
+    cities: City[];
+  }>(GET_INITIAL_CITIES_QUERY);
+
+  useEffect(() => {
+    if (groupBy === "Country") {
+      getInitialCountries();
+    } else if (groupBy === "City") {
+      getInitialCities();
+    }
+  }, [
+    citiesQuery.called,
+    countriesQuery.called,
+    getInitialCities,
+    getInitialCountries,
+    groupBy,
+  ]);
+
+  if (countriesQuery.loading || citiesQuery.loading) return <p>Loading...</p>;
+
+  const error = countriesQuery.error ?? citiesQuery.error;
   if (error) return <p>Error : {error.message}</p>;
 
-  const countries = data?.countries.map((country) => (
-    <Card key={country.name}>
+  const countries = countriesQuery.data?.countries.map((country) => (
+    <Card key={country.countryCode}>
       <Card.Header className="flex flex-row items-center justify-center space-x-2">
         <h2 className="m-0">{country.name}</h2>
         <span role="img" aria-label="flag" className="m-0 text-3xl">
@@ -49,19 +63,81 @@ export const HomePage = () => {
     </Card>
   ));
 
+  const cities = citiesQuery.data?.cities.map((city) => (
+    <Card key={city.id}>
+      <Card.Header className="flex flex-row items-center justify-center space-x-2">
+        <h2 className="m-0">{city.name}</h2>
+        {city.isCapital ? (
+          <span role="img" aria-label="capital" className="m-0 text-3xl">
+            ⭐️
+          </span>
+        ) : (
+          <></>
+        )}
+      </Card.Header>
+      <Card.Content>
+        <p>
+          <b>Population: </b>
+          {city.population}
+        </p>
+        <Button
+          className="self-center"
+          onClick={() =>
+            navigate(`/country/${city.country.countryCode}/city/${city.id}`)
+          }
+        >
+          View More
+        </Button>
+      </Card.Content>
+    </Card>
+  ));
+
   const onFilterApply = (filter: number) => {
-    refetch({
-      countriesInput: {
-        population: {
-          greaterThan: filter,
+    if (groupBy == "Country") {
+      countriesQuery.refetch({
+        countriesInput: {
+          population: {
+            greaterThan: filter,
+          },
         },
-      },
-    });
+      });
+    } else {
+      citiesQuery.refetch({
+        citiesInput: {
+          population: {
+            greaterThan: filter,
+          },
+        },
+      });
+    }
   };
 
   return (
     <div className="prose max-w-full space-y-4">
-      <h3>Group By: Countries</h3>
+      <div>
+        <h3>Group By: {groupBy}</h3>
+        <label>
+          <input
+            onChange={() => setGroupBy("Country")}
+            type="radio"
+            name="groupBy"
+            value="Country"
+            checked={groupBy === "Country"}
+          />
+          <span>Countries</span>
+        </label>
+        <label>
+          <input
+            onChange={() => setGroupBy("City")}
+            type="radio"
+            name="groupBy"
+            value="City"
+            checked={groupBy === "City"}
+          />
+          <span>Cities</span>
+        </label>
+      </div>
+
       <div>Search</div>
       <FilterMenu
         title={"Filter Countries"}
@@ -73,7 +149,7 @@ export const HomePage = () => {
         ]}
       />
       <div className="flex flex-wrap justify-center md:justify-start">
-        {countries}
+        {groupBy === "Country" ? countries : cities}
       </div>
     </div>
   );
