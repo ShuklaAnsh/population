@@ -140,7 +140,7 @@ export const HomePage = () => {
 
       <div>Search</div>
       <FilterMenu
-        title={"Filter Countries"}
+        title={"Filter Population"}
         filters={[
           {
             label: "Greater than",
