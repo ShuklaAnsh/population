@@ -1,8 +1,10 @@
-import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
 import { Country } from "../types";
 import { convertEmoji } from "../utils";
 import { FilterMenu } from "../components/filter-menu";
+import { Card } from "../components/card";
+import { Button } from "../components/button";
 
 const GET_INITIAL_COUNTRIES_QUERY = gql`
   query HomePageCountryDetails($countriesInput: CountriesInput) {
@@ -16,6 +18,7 @@ const GET_INITIAL_COUNTRIES_QUERY = gql`
 `;
 
 export const HomePage = () => {
+  const navigate = useNavigate();
   const { loading, error, data, refetch } = useQuery<{
     countries: Country[];
   }>(GET_INITIAL_COUNTRIES_QUERY);
@@ -24,31 +27,26 @@ export const HomePage = () => {
   if (error) return <p>Error : {error.message}</p>;
 
   const countries = data?.countries.map((country) => (
-    <div
-      className="outline-pd-green bg-pd-green m-2 min-h-[175px] min-w-[200px] max-w-fit rounded-lg outline outline-4"
-      key={country.name}
-    >
-      <div className="flex flex-row items-center justify-center space-x-2 p-2">
+    <Card key={country.name}>
+      <Card.Header className="flex flex-row items-center justify-center space-x-2">
         <h2 className="m-0">{country.name}</h2>
         <span role="img" aria-label="flag" className="m-0 text-3xl">
           {convertEmoji(country.flagEmoji)}
         </span>
-      </div>
-      <div className="flex flex-col rounded-lg bg-white p-4">
+      </Card.Header>
+      <Card.Content>
         <p>
           <b>Population: </b>
           {country.population}
         </p>
-        <NavLink
-          className=" self-center pb-2"
-          to={`/country/${country.countryCode}`}
+        <Button
+          className="self-center"
+          onClick={() => navigate(`/country/${country.countryCode}`)}
         >
-          <a className="bg-pd-amber rounded-md p-2 text-zinc-600 shadow-sm hover:bg-amber-500 hover:shadow-lg">
-            View More
-          </a>
-        </NavLink>
-      </div>
-    </div>
+          View More
+        </Button>
+      </Card.Content>
+    </Card>
   ));
 
   const onFilterApply = (filter: number) => {
@@ -74,7 +72,9 @@ export const HomePage = () => {
           },
         ]}
       />
-      <div className="flex flex-wrap justify-center">{countries}</div>
+      <div className="flex flex-wrap justify-center md:justify-start">
+        {countries}
+      </div>
     </div>
   );
 };
